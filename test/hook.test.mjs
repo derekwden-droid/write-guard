@@ -29,12 +29,11 @@ function file(name, bytes) {
 }
 
 function run(phase, input, settings = {}) {
-  const vars = { ...process.env, CLAUDE_PLUGIN_DATA: dataDir };
-  for (const k of Object.keys(vars)) if (k.startsWith('WRITE_GUARD_')) delete vars[k];
+  // The child gets only what the script reads, plus SystemRoot, which Windows processes expect.
   const result = spawnSync(process.execPath, [SCRIPT, phase], {
     input: typeof input === 'string' ? input : JSON.stringify(input),
     encoding: 'utf8',
-    env: { ...vars, ...settings },
+    env: { CLAUDE_PLUGIN_DATA: dataDir, SystemRoot: process.env.SystemRoot, ...settings },
   });
   return {
     status: result.status,

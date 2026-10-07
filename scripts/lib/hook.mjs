@@ -18,12 +18,13 @@ const MODES = new Set(['restore', 'warn', 'block', 'off']);
 const BOM = String.fromCharCode(0xfeff);
 const ISSUE = 'anthropics/claude-code#72957';
 
-export function readSettings(vars = process.env) {
-  const mode = String(vars.WRITE_GUARD_MODE || 'restore').trim().toLowerCase();
+// Reads the three WRITE_GUARD_ variables by name and nothing else from the environment.
+export function readSettings() {
+  const mode = String(process.env.WRITE_GUARD_MODE || 'restore').trim().toLowerCase();
   return {
     mode: MODES.has(mode) ? mode : 'restore',
-    classes: parseClasses(vars.WRITE_GUARD_RESTORE),
-    keepFormat: String(vars.WRITE_GUARD_KEEP_FORMAT || '1').trim() !== '0',
+    classes: parseClasses(process.env.WRITE_GUARD_RESTORE),
+    keepFormat: String(process.env.WRITE_GUARD_KEEP_FORMAT || '1').trim() !== '0',
   };
 }
 
