@@ -1,0 +1,17 @@
+{
+  "name": "write-guard",
+  "displayName": "Write Guard",
+  "version": "1.0.0",
+  "description": "Stops Claude Code's file writes from silently planting invisible characters, dropping byte-order marks or flipping CRLF line endings, and checks every written file for damage.",
+  "author": {
+    "name": "Derek Denmark",
+    "url": "https://github.com/derekwden-droid"
+  },
+  "homepage": "https://github.com/derekwden-droid/write-guard",
+  "repository": "https://github.com/derekwden-droid/write-guard",
+  "license": "MIT",
+  "keywords": ["unicode", "encoding", "invisible-characters", "trojan-source", "bidi", "line-endings", "bom", "hooks"],
+  "documentationUrl": "https://github.com/derekwden-droid/write-guard/blob/main/README.md",
+  "supportUrl": "https://github.com/derekwden-droid/write-guard/issues",
+  "privacyPolicyUrl": "https://github.com/derekwden-droid/write-guard/blob/main/PRIVACY.md"
+}

@@ -1,0 +1,29 @@
+{
+  "description": "Restores backslash-u escapes that Claude Code decodes into invisible characters, keeps byte-order marks and CRLF line endings when Write overwrites a file, and checks each written file for damage.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit",
+        "hooks": [
+          { "type": "command", "command": "node", "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/write-guard.mjs", "pre"], "timeout": 30 }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          { "type": "command", "command": "node", "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/write-guard.mjs", "post"], "timeout": 30 }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          { "type": "command", "command": "node", "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/write-guard.mjs", "cleanup"], "timeout": 30 }
+        ]
+      }
+    ]
+  }
+}
