@@ -7,6 +7,7 @@ write-guard is a set of Claude Code hooks that catch these as they happen:
 - **Before each Write, Edit and NotebookEdit**, it turns decoded characters that are almost never meant raw back into the escape text Claude typed: control characters, zero-width and other invisible characters, bidirectional controls, line and paragraph separators, a stray U+FEFF, and tag characters. In code and data files that already spell a character as an escape, such as a translation file written by Python's `json.dump`, it writes new occurrences the same way.
 - **When Write overwrites a file**, it keeps the file's UTF-8 or UTF-16 byte-order mark and its CRLF line endings.
 - **After each write**, it reads the file back and tells Claude and you if the encoding changed, a byte-order mark appeared or disappeared, line endings flipped or got mixed, or NUL bytes, U+FFFD replacement characters or control characters arrived that the write didn't contain.
+- **When Korean comes out wrong.** Claude sometimes writes Korean as escapes and gets a hex digit wrong, which decodes to a real but wrong syllable ([anthropics/claude-code#83033](https://github.com/anthropics/claude-code/issues/83033)). Before each write, write-guard looks for Hangul syllables outside the 2,350 that everyday Korean uses (KS X 1001) and that the file doesn't already contain, and asks Claude to check those words. It never changes them.
 
 Whenever it changes something, Claude gets a note next to the tool result saying exactly what changed and why, so its picture of the file stays accurate. A short line tells you too.
 
@@ -65,6 +66,8 @@ Set these in the `env` block of your Claude Code settings.
 - It can't know what Claude typed, only what Claude Code decoded. A decoded accented letter or emoji in a new file stays raw unless you turn on `non-ascii`.
 - If you ask Claude to remove a byte-order mark or convert CRLF to LF and it uses Write, write-guard puts them back and says so, and Claude then needs a shell command. Set `WRITE_GUARD_KEEP_FORMAT=0` if you do that often.
 - If another plugin's hook also rewrites the input of the same Write or Edit, Claude Code keeps whichever reply arrives last.
+- The Hangul check catches about four in five mis-spelled syllables: a wrong digit that lands on another common syllable looks like ordinary Korean. Real words outside KS X 1001, such as some slang and loanwords, get a note too; Claude checks them and moves on.
+- Files in a legacy encoding such as Windows-1252, Shift-JIS or GBK are left alone. Claude Code 2.1.299 and later refuse to Edit or Write them at all, so they can't be damaged that way.
 
 ## Requirements
 

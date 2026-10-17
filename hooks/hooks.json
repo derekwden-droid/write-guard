@@ -1,5 +1,5 @@
 {
-  "description": "Restores backslash-u escapes that Claude Code decodes into invisible characters, keeps byte-order marks and CRLF line endings when Write overwrites a file, and checks each written file for damage.",
+  "description": "Restores backslash-u escapes that Claude Code decodes into invisible characters, keeps byte-order marks and CRLF line endings when Write overwrites a file, checks each written file for damage, and flags Hangul syllables that mis-spelled escapes produce.",
   "hooks": {
     "PreToolUse": [
       {

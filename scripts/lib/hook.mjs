@@ -11,6 +11,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { CONTROL, describe, escapeCodePoint, isBidi, label } from './chars.mjs';
 import { FILE_STYLE, escapesMeaningfulIn, parseClasses, restoreText } from './restore.mjs';
+import { rareHangul, rareHangulNote } from './hangul.mjs';
 import { damageCounts, encode, profile, readFile } from './text.mjs';
 import * as state from './state.mjs';
 
@@ -185,6 +186,26 @@ export function pre(input, settings) {
   }
 
   const name = path.basename(target);
+  // Hangul that looks like a mis-spelled escape: each new text, with the text it can be
+  // compared against so a rare syllable the file already uses isn't reported.
+  const rare = new Map();
+  let written;
+  if (tool === 'Write') written = [[args.content, fileText]];
+  else if (tool === 'NotebookEdit') written = [[args.new_source, notebookText(fileText)]];
+  else {
+    const edits = tool === 'Edit' ? [args] : args.edits;
+    written = edits.filter(Boolean).map((edit) => [edit.new_string, String(edit.old_string || '') + (fileText || '')]);
+  }
+  for (const [text, known] of written) {
+    for (const [cp, entry] of rareHangul(text, known)) {
+      const seen = rare.get(cp);
+      if (!seen) rare.set(cp, entry);
+      else {
+        seen.count += entry.count;
+        for (const word of entry.words) if (seen.words.length < 3 && !seen.words.includes(word)) seen.words.push(word);
+      }
+    }
+  }
   const found = restored.size > 0;
   const keptFormat = format.length > 0 && settings.keepFormat && settings.mode !== 'warn';
   const blocking = settings.mode === 'block' && found;
@@ -221,6 +242,13 @@ export function pre(input, settings) {
     if (found || keptFormat) reply.hookSpecificOutput.updatedInput = updated;
   }
   if (leftRaw.size > 0) notes.push(leftRawNote(name, leftRaw));
+  const hangulNote = rareHangulNote(tool, name, rare);
+  if (hangulNote) {
+    notes.push(hangulNote);
+    const flagged = [...rare.keys()].slice(0, 4).map((cp) => String.fromCharCode(cp)).join(', ');
+    reply.systemMessage = (reply.systemMessage ? reply.systemMessage + '; ' : 'write-guard: ') +
+      'unusual Hangul in ' + name + ' (' + flagged + '), possibly mis-spelled escapes';
+  }
   if (notes.length === 0) return null;
   reply.hookSpecificOutput.additionalContext = notes.join('\n\n');
   return reply;

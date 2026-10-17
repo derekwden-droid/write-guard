@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.0 - 2026-10-17
+
+- Before each Write, Edit, MultiEdit and NotebookEdit, flags Hangul syllables outside the 2,350
+  of KS X 1001 that the file doesn't already use. These are the usual result of Claude typing
+  Korean as escapes with a wrong hex digit (anthropics/claude-code#83033). Claude gets a note
+  quoting each word to check; the text is never changed. `WRITE_GUARD_MODE=off` turns it off.
+
 ## 1.0.0 - 2026-10-07
 
 - PreToolUse hook for Write, Edit, MultiEdit and NotebookEdit that restores backslash-u escapes
